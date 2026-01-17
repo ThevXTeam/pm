@@ -22,7 +22,7 @@ local function list()
   for i=1,#repos do
     local r = repos[i]
     if r.name and r.description then
-      print(string.format("%-20s - %s", r.name, r.description))
+      print(string.format("%-10s - %s", r.name, r.description))
     else
       print(r.name)
     end
