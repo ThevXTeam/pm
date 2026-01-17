@@ -20,6 +20,7 @@ local function list()
   local repos, err = repo.listRepos()
   if not repos then print("Error listing repos:", err); return end
   for i=1,#repos do
+    local r = repos[i]
     if r.name and r.description then
       print(string.format("%-20s - %s", r.name, r.description))
     else
