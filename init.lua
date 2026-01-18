@@ -110,7 +110,7 @@ local function install(repoName)
           local fullDir = fs.combine(basePath, dir)
           if not fs.exists(fullDir) then fs.makeDir(fullDir) end
         end
-        local content, err = repo.fetchRaw(nil, repoName, info.truncated and "master" or (info.url and "master" or "master"), node.path)
+        local content, err = repo.fetchRaw(nil, repoName, info.truncated and "main" or (info.url and "main" or "main"), node.path)
         if not content then print("Failed to fetch", node.path, err) else
           local outPath = fs.combine(basePath, node.path)
           local f = fs.open(outPath, "w")
@@ -123,7 +123,7 @@ local function install(repoName)
     local aliasPath = fs.combine(basePath, "alias.lua")
     if fs.exists(aliasPath) then
       print("Executing alias script at ", aliasPath)
-      pcall(function() shell.run(aliasPath) end)
+      shell.run(aliasPath)
     else
       print("No alias script found at ", aliasPath)
     end
