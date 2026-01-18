@@ -19,13 +19,63 @@ end
 local function list()
   local repos, err = repo.listRepos()
   if not repos then print("Error listing repos:", err); return end
+
+  local term_ok, w, h = pcall(function() return term.getSize() end)
+  local width = 80
+  if term_ok and w then width = w end
+
+  -- build rows and determine column sizes
+  local rows = {}
+  local maxName = #"program"
+  local statusWidth = #"status"
   for i=1,#repos do
     local r = repos[i]
-    if r.name and r.description then
-      print(string.format("%-10s - %s", r.name, r.description))
-    else
-      print(r.name)
+    if r and r.name then
+      local name = r.name
+      local desc = r.description or ""
+      local status = "available"
+      local instPath = fs.combine(config.installPath, name)
+      if fs.exists(instPath) then status = "installed" end
+      if #name > maxName then maxName = #name end
+      if #status > statusWidth then statusWidth = #status end
+      table.insert(rows, {name=name, status=status, desc=desc})
     end
+  end
+
+  -- allocate widths: separators ' | ' twice = 6 chars
+  local sepTotal = 6
+  local progCol = math.min(maxName, math.max(6, math.floor(width * 0.25)))
+  local statCol = math.max(statusWidth, 9)
+  local descCol = width - progCol - statCol - sepTotal
+  if descCol < 8 then
+    -- shrink program column if needed
+    local extra = 8 - descCol
+    progCol = math.max(6, progCol - extra)
+    descCol = width - progCol - statCol - sepTotal
+    if descCol < 0 then descCol = 0 end
+  end
+
+  -- header
+  local header = string.format("%-"..progCol.."s | %-"..statCol.."s | %s", "program", "status", "description")
+  print(header)
+  local sep = {}
+  for i=1,#header do
+    local ch = header:sub(i,i)
+    if ch == '|' then sep[i] = '+' else sep[i] = '-' end
+  end
+  print(table.concat(sep))
+
+  for i=1,#rows do
+    local r = rows[i]
+    local desc = r.desc or ""
+    if #desc > descCol then
+      if descCol > 3 then
+        desc = desc:sub(1, descCol-3) .. "..."
+      else
+        desc = desc:sub(1, descCol)
+      end
+    end
+    print(string.format("%-"..progCol.."s | %-"..statCol.."s | %s", r.name, r.status, desc))
   end
 end
 
