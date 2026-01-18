@@ -119,6 +119,15 @@ local function install(repoName)
         end
       end
     end
+    -- execute the alias script if present
+    local aliasPath = fs.combine(basePath, "alias.lua")
+    if fs.exists(aliasPath) then
+      local aliasFunc = loadfile(aliasPath)
+      if aliasFunc then
+        local ok, err = pcall(aliasFunc)
+        if not ok then print("Error running alias script:", err) end
+      end
+    end
     print("Installed: " .. repoName)
   end)
   if not ok then print("Install failed:") print(err) end
